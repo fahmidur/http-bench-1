@@ -7,17 +7,17 @@ end
 
 desc "Compile server.exe"
 file 'server.exe' => ['server.cpp'] do
-    RakefileUtils.compile_cpp("server.cpp")
+  compile_cpp("server.cpp")
 end
 
 desc "Clean everything"
 task :clean do
-    sh "rm -rf *.exe"
+  sh "rm -rf *.exe"
 end
 
 desc "Try it"
 task :try => [:build] do
-    sh "./server.exe"
+  sh "./server.exe"
 end
 
 task :default => :build
