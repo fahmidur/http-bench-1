@@ -79,7 +79,7 @@ All of the scripts here using `go-wrk` as the HTTP bencharking tool, and they ex
 What follows are results specific to my development machine.
 We encourage you to run your own benchmarks on your own machine.
 
-![results1](./report.sample/screenshots/001.png)
+![results1](./report.sample/screenshots/002.png)
 
 On the x-axis we have increasing client concurrency, which is the `-c` flag for `go-wrk`.
 
