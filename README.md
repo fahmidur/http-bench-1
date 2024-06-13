@@ -3,6 +3,8 @@
 The purpose of this repo is to benchmark
 different HTTP libraries available to Golang and C++.
 
+**WARNING**: This repository is a work in progress, the implementations benchmarked here are far from ideal, please do not draw any conclusions.
+
 ## Test Implementations
 
 The following descriptions of each of the test implementations all of which produce a static server binary.
@@ -26,8 +28,6 @@ The following descriptions of each of the test implementations all of which prod
   * Language: C++
   * Libraries: Boost v1.85.0
   * Modified from the [Boost Beast Fast HTTP Server Example](https://github.com/boostorg/beast/blob/boost-1.85.0/example/http/server/fast/http_server_fast.cpp)
-  * Removed the deadline, the idea here was that perhaps the deadline is slowing things down.
-  * Set keep_alive to true
 * [golang_1](./golang-1/)
   * Language: Golang
   * Libraries: Standard `net/http` core library.
@@ -48,8 +48,7 @@ Usage of <path/to/executable>:
 
 ```
 
-Each server implementations must respond 200 to the `/time` endpoint with the following
-template of an output:
+Each server implementations must respond 200 to the `/time` endpoint with the following output template:
 ```
 <html>
 <head><title>Current time</title></head>
@@ -60,9 +59,9 @@ template of an output:
 </html>
 ```
 
-This was selected in order to match one of the endpoints in the Boost Beat v1.85.0 Small HTTP Example.
-It exercises dynamic string concatenation, or templating, which
-is common for HTTP application servers.
+This was selected in order to match one of the endpoints in the Boost Beast v1.85.0 Small HTTP Example.
+It exercises some dynamic string concatenation which is common for HTTP
+application servers.
 
 ## Test Tools
 
@@ -87,8 +86,6 @@ On the y-axis we are plotting the number requests per second over a 5 second tes
 
 These tests are not run at the same time, they are run sequentially so that each server has the full run of the test machine.
 Once again, we encourage you to run your own benchmarks.
-
-Note: I have done a build of the Boost Asio/Beast server with the server's "concurrency hint" set to higher numbers, and the results were approximately the same. 
 
 ## Running The Tests Yourself
 
