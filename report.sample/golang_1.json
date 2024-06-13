@@ -1,0 +1,82 @@
+[
+  {
+    "requests_per_sec": 9497.94,
+    "transfer_per_sec": "2.18MB",
+    "avg_req_time": "105.285µs",
+    "fastest_request": "34.906µs",
+    "slowest_request": "1.023577ms",
+    "number_of_errors": 0.0,
+    "_duration": 5,
+    "_concurrency": 1
+  },
+  {
+    "requests_per_sec": 22907.67,
+    "transfer_per_sec": "5.26MB",
+    "avg_req_time": "87.306µs",
+    "fastest_request": "28.433µs",
+    "slowest_request": "779.618µs",
+    "number_of_errors": 0.0,
+    "_duration": 5,
+    "_concurrency": 2
+  },
+  {
+    "requests_per_sec": 52045.84,
+    "transfer_per_sec": "11.96MB",
+    "avg_req_time": "57.641µs",
+    "fastest_request": "27.722µs",
+    "slowest_request": "566.747µs",
+    "number_of_errors": 0.0,
+    "_duration": 5,
+    "_concurrency": 3
+  },
+  {
+    "requests_per_sec": 72107.93,
+    "transfer_per_sec": "16.57MB",
+    "avg_req_time": "55.472µs",
+    "fastest_request": "26.16µs",
+    "slowest_request": "714.645µs",
+    "number_of_errors": 0.0,
+    "_duration": 5,
+    "_concurrency": 4
+  },
+  {
+    "requests_per_sec": 86898.24,
+    "transfer_per_sec": "19.97MB",
+    "avg_req_time": "57.538µs",
+    "fastest_request": "26.8µs",
+    "slowest_request": "881.6µs",
+    "number_of_errors": 0.0,
+    "_duration": 5,
+    "_concurrency": 5
+  },
+  {
+    "requests_per_sec": 98185.33,
+    "transfer_per_sec": "22.57MB",
+    "avg_req_time": "61.108µs",
+    "fastest_request": "26.33µs",
+    "slowest_request": "1.149464ms",
+    "number_of_errors": 0.0,
+    "_duration": 5,
+    "_concurrency": 6
+  },
+  {
+    "requests_per_sec": 107487.49,
+    "transfer_per_sec": "24.70MB",
+    "avg_req_time": "65.123µs",
+    "fastest_request": "28.013µs",
+    "slowest_request": "1.114157ms",
+    "number_of_errors": 0.0,
+    "_duration": 5,
+    "_concurrency": 7
+  },
+  {
+    "requests_per_sec": 109115.81,
+    "transfer_per_sec": "25.08MB",
+    "avg_req_time": "73.316µs",
+    "fastest_request": "27.942µs",
+    "slowest_request": "1.977083ms",
+    "number_of_errors": 0.0,
+    "_duration": 5,
+    "_concurrency": 8
+  }
+]

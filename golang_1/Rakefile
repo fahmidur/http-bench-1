@@ -1,0 +1,16 @@
+task :default => :build 
+
+desc "Build everything"
+task :build => ["server.exe"] do
+end
+
+desc "Build server.exe"
+file "server.exe" => ["server.go"] do
+    sh "go build -o server.exe server.go"
+end
+
+desc "Clean everything"
+task :clean do
+    sh "rm -rf *.exe"
+end
+

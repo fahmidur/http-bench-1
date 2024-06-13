@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "compilerPath": "/usr/bin/g++",
+            "cppStandard": "c++20",
+            "includePath": [
+                "./",
+                "/home/syed/data/clibs/boost_1_85_0/include",
+                "/usr/include/c++/12",
+                "/usr/include/x86_64-linux-gnu/c++/12",
+                "/usr/include/c++/12/backward",
+                "/usr/lib/gcc/x86_64-linux-gnu/12/include",
+                "/usr/local/include",
+                "/usr/include/x86_64-linux-gnu",
+                "/usr/include"
+            ]
+        }
+    ],
+    "version": 4
+}

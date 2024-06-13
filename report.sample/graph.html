@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width" />
+  <title>Graph</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <div>
+    <canvas id="chart"></canvas>
+  </div>
+
+  <script>
+    const ctx = document.getElementById('chart');
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [1, 2, 3, 4, 5, 6, 7, 8],
+        datasets: [{"label":"cpp_boost_1","data":[4322.58,14281.26,20958.65,21260.2,19831.1,19921.16,20141.06,20405.15]},{"label":"cpp_boost_2","data":[4179.89,14451.01,21260.3,23610.89,23328.37,23474.95,23501.23,23882.9]},{"label":"golang_1","data":[9497.94,22907.67,52045.84,72107.93,86898.24,98185.33,107487.49,109115.81]}]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'requests_per_sec'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: '_concurrency'
+            }
+          }
+        }
+      }
+    });
+  </script>
+  
+</body>
+</html>
+
