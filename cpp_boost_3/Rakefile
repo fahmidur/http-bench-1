@@ -1,47 +1,5 @@
 require 'json'
-
-c_cpp_properties_path = "./c_cpp_properties.json"
-unless File.exist?(c_cpp_properties_path)
-  puts "ERROR: expecting c_cpp_properties.json"
-  exit 1
-end
-
-def get_os_name
-  if RUBY_PLATFORM =~ /darwin/i
-    return 'Mac'
-  end
-  if RUBY_PLATFORM =~ /cygwin|mswin|mingw|bccwin|wince|emx/i
-    return 'Win32'
-  end
-  if RUBY_PLATFORM =~ /linux/i
-    return 'Linux'
-  end
-  return nil
-end
-
-# puts "RUBY_PLATFORM=#{RUBY_PLATFORM}"
-c_cpp_properties = JSON.parse(IO.read('./c_cpp_properties.json'))
-os_name = get_os_name()
-unless os_name
-  puts "ERROR: could not determine os name"
-  exit 1
-end
-# puts "os_name=#{os_name}"
-os_conf = nil
-c_cpp_properties['configurations'].each do |obj|
-  if obj['name'] == os_name
-    os_conf = obj
-    break
-  end
-end
-# puts "os_conf=#{os_conf}"
-unless os_conf
-  puts "ERROR: no conf found for os"
-  exit 1
-end
-
-include_flags = os_conf['includePath'].map{|e| "-I#{e}" }.join(' ')
-# puts "include_flags=#{include_flags}"
+require_relative '../RakefileUtils.rb'
 
 desc "Build everything"
 task :build => ["server.exe"] do
@@ -49,7 +7,7 @@ end
 
 desc "Compile server.exe"
 file 'server.exe' => ['server.cpp'] do
-    sh "g++ -O3 -std=c++20 -o server.exe server.cpp #{include_flags} -static"
+    RakefileUtils.compile_cpp("server.cpp")
 end
 
 desc "Clean everything"
