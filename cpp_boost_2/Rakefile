@@ -59,7 +59,7 @@ end
 
 desc "Try it"
 task :try => [:build] do
-    sh "./server.exe 0.0.0.0 3535"
+    sh "./server.exe"
 end
 
 task :default => :build
