@@ -20,7 +20,7 @@
 
 namespace beast = boost::beast;         // from <boost/beast.hpp>
 namespace http = beast::http;           // from <boost/beast/http.hpp>
-namespace net = boost::asio;            // from <boost/asio.hpp>
+namespace asio = boost::asio;            // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
 
@@ -39,47 +39,46 @@ namespace my_program_state {
 }
 
 // Return a reasonable mime type based on the extension of a file.
-beast::string_view
-mime_type(beast::string_view path) {
-    using beast::iequals;
-    auto const ext = [&path]{
-        auto const pos = path.rfind(".");
-        if(pos == beast::string_view::npos)
-            return beast::string_view{};
-        return path.substr(pos);
-    }();
-    if(iequals(ext, ".htm"))  return "text/html";
-    if(iequals(ext, ".html")) return "text/html";
-    if(iequals(ext, ".php"))  return "text/html";
-    if(iequals(ext, ".css"))  return "text/css";
-    if(iequals(ext, ".txt"))  return "text/plain";
-    if(iequals(ext, ".js"))   return "application/javascript";
-    if(iequals(ext, ".json")) return "application/json";
-    if(iequals(ext, ".xml"))  return "application/xml";
-    if(iequals(ext, ".swf"))  return "application/x-shockwave-flash";
-    if(iequals(ext, ".flv"))  return "video/x-flv";
-    if(iequals(ext, ".png"))  return "image/png";
-    if(iequals(ext, ".jpe"))  return "image/jpeg";
-    if(iequals(ext, ".jpeg")) return "image/jpeg";
-    if(iequals(ext, ".jpg"))  return "image/jpeg";
-    if(iequals(ext, ".gif"))  return "image/gif";
-    if(iequals(ext, ".bmp"))  return "image/bmp";
-    if(iequals(ext, ".ico"))  return "image/vnd.microsoft.icon";
-    if(iequals(ext, ".tiff")) return "image/tiff";
-    if(iequals(ext, ".tif"))  return "image/tiff";
-    if(iequals(ext, ".svg"))  return "image/svg+xml";
-    if(iequals(ext, ".svgz")) return "image/svg+xml";
-    return "application/text";
-}
+// beast::string_view
+// mime_type(beast::string_view path) {
+//     using beast::iequals;
+//     auto const ext = [&path]{
+//         auto const pos = path.rfind(".");
+//         if(pos == beast::string_view::npos)
+//             return beast::string_view{};
+//         return path.substr(pos);
+//     }();
+//     if(iequals(ext, ".htm"))  return "text/html";
+//     if(iequals(ext, ".html")) return "text/html";
+//     if(iequals(ext, ".php"))  return "text/html";
+//     if(iequals(ext, ".css"))  return "text/css";
+//     if(iequals(ext, ".txt"))  return "text/plain";
+//     if(iequals(ext, ".js"))   return "application/javascript";
+//     if(iequals(ext, ".json")) return "application/json";
+//     if(iequals(ext, ".xml"))  return "application/xml";
+//     if(iequals(ext, ".swf"))  return "application/x-shockwave-flash";
+//     if(iequals(ext, ".flv"))  return "video/x-flv";
+//     if(iequals(ext, ".png"))  return "image/png";
+//     if(iequals(ext, ".jpe"))  return "image/jpeg";
+//     if(iequals(ext, ".jpeg")) return "image/jpeg";
+//     if(iequals(ext, ".jpg"))  return "image/jpeg";
+//     if(iequals(ext, ".gif"))  return "image/gif";
+//     if(iequals(ext, ".bmp"))  return "image/bmp";
+//     if(iequals(ext, ".ico"))  return "image/vnd.microsoft.icon";
+//     if(iequals(ext, ".tiff")) return "image/tiff";
+//     if(iequals(ext, ".tif"))  return "image/tiff";
+//     if(iequals(ext, ".svg"))  return "image/svg+xml";
+//     if(iequals(ext, ".svgz")) return "image/svg+xml";
+//     return "application/text";
+// }
 
 class http_worker {
 public:
     http_worker(http_worker const&) = delete;
     http_worker& operator=(http_worker const&) = delete;
 
-    http_worker(tcp::acceptor& acceptor, const std::string& doc_root) :
-        acceptor_(acceptor),
-        doc_root_(doc_root)
+    http_worker(tcp::acceptor& acceptor) :
+        acceptor_(acceptor)
     {
     }
 
@@ -96,9 +95,6 @@ private:
     // The acceptor used to listen for incoming connections.
     tcp::acceptor& acceptor_;
 
-    // The path to the root of the document directory.
-    std::string doc_root_;
-
     // The socket for the currently connected client.
     tcp::socket socket_{acceptor_.get_executor()};
 
@@ -112,7 +108,7 @@ private:
     boost::optional<http::request_parser<request_body_t, alloc_t>> parser_;
 
     // The timer putting a time limit on requests.
-    net::steady_timer request_deadline_{
+    asio::steady_timer request_deadline_{
         acceptor_.get_executor(), (std::chrono::steady_clock::time_point::max)()};
 
     // The string-based response message.
@@ -219,26 +215,19 @@ private:
         string_response_->keep_alive(false);
         string_response_->set(http::field::server, "Beast");
         string_response_->set(http::field::content_type, "text/html");
-        // beast::ostream(string_response_->body())
-        //     <<  "<html>\n"
-        //     <<  "<head><title>Current time</title></head>\n"
-        //     <<  "<body>\n"
-        //     <<  "<h1>Current time</h1>\n"
-        //     <<  "<p>The current time is "
-        //     <<  my_program_state::now()
-        //     <<  " seconds since the epoch.</p>\n"
-        //     <<  "</body>\n"
-        //     <<  "</html>\n";
-        string_response_->body() = std::string(
-            "<html>\n"
-            "<head><title>Current time</title></head>\n"
-            "<body>\n"
-            "<h1>Current time</h1>\n"
-            "<p>The current time is "
-            " seconds since the epoch.</p>\n"
-            "</body>\n"
-            "</html>\n"
-        );
+
+        std::stringstream body_stream;
+        body_stream 
+            <<  "<html>\n"
+            <<  "<head><title>Current time</title></head>\n"
+            <<  "<body>\n"
+            <<  "<h1>Current time</h1>\n"
+            <<  "<p>The current time is "
+            <<  my_program_state::now()
+            <<  " seconds since the epoch.</p>\n"
+            <<  "</body>\n"
+            <<  "</html>\n";
+        string_response_->body() = body_stream.str();
 
         string_response_->prepare_payload();
         string_serializer_.emplace(*string_response_);
@@ -282,63 +271,63 @@ private:
         );
     }
 
-    void send_file(beast::string_view target) {
-        // Request path must be absolute and not contain "..".
-        if (target.empty() || target[0] != '/' || target.find("..") != std::string::npos) {
-            send_bad_response(
-                http::status::not_found,
-                "File not found\r\n"
-            );
-            return;
-        }
+    // void send_file(beast::string_view target) {
+    //     // Request path must be absolute and not contain "..".
+    //     if (target.empty() || target[0] != '/' || target.find("..") != std::string::npos) {
+    //         send_bad_response(
+    //             http::status::not_found,
+    //             "File not found\r\n"
+    //         );
+    //         return;
+    //     }
 
-        std::string full_path = doc_root_;
-        full_path.append(
-            target.data(),
-            target.size()
-        );
+    //     std::string full_path = doc_root_;
+    //     full_path.append(
+    //         target.data(),
+    //         target.size()
+    //     );
 
-        http::file_body::value_type file;
-        beast::error_code ec;
-        file.open(
-            full_path.c_str(),
-            beast::file_mode::read,
-            ec
-        );
-        if(ec) {
-            send_bad_response(
-                http::status::not_found,
-                "File not found\r\n"
-            );
-            return;
-        }
+    //     http::file_body::value_type file;
+    //     beast::error_code ec;
+    //     file.open(
+    //         full_path.c_str(),
+    //         beast::file_mode::read,
+    //         ec
+    //     );
+    //     if(ec) {
+    //         send_bad_response(
+    //             http::status::not_found,
+    //             "File not found\r\n"
+    //         );
+    //         return;
+    //     }
 
-        file_response_.emplace(
-            std::piecewise_construct,
-            std::make_tuple(),
-            std::make_tuple(alloc_)
-        );
+    //     file_response_.emplace(
+    //         std::piecewise_construct,
+    //         std::make_tuple(),
+    //         std::make_tuple(alloc_)
+    //     );
 
-        file_response_->result(http::status::ok);
-        file_response_->keep_alive(false);
-        file_response_->set(http::field::server, "Beast");
-        file_response_->set(http::field::content_type, mime_type(std::string(target)));
-        file_response_->body() = std::move(file);
-        file_response_->prepare_payload();
+    //     file_response_->result(http::status::ok);
+    //     file_response_->keep_alive(false);
+    //     file_response_->set(http::field::server, "Beast");
+    //     file_response_->set(http::field::content_type, mime_type(std::string(target)));
+    //     file_response_->body() = std::move(file);
+    //     file_response_->prepare_payload();
 
-        file_serializer_.emplace(*file_response_);
+    //     file_serializer_.emplace(*file_response_);
 
-        http::async_write(
-            socket_,
-            *file_serializer_,
-            [this](beast::error_code ec, std::size_t) {
-                socket_.shutdown(tcp::socket::shutdown_send, ec);
-                file_serializer_.reset();
-                file_response_.reset();
-                accept();
-            }
-        );
-    }
+    //     http::async_write(
+    //         socket_,
+    //         *file_serializer_,
+    //         [this](beast::error_code ec, std::size_t) {
+    //             socket_.shutdown(tcp::socket::shutdown_send, ec);
+    //             file_serializer_.reset();
+    //             file_response_.reset();
+    //             accept();
+    //         }
+    //     );
+    // }
 
     void check_deadline() {
         // The deadline may have moved, so check it has really passed.
@@ -358,37 +347,83 @@ private:
     }
 };
 
+void print_usage(const char* argv0) {
+    std::cout << "Usage of " << argv0 << ":" << std::endl;
+    std::cout << "  -addr string" << std::endl;
+    std::cout << "    The listening address (default \"127.0.0.1\")" << std::endl;
+    std::cout << "  -port int" << std::endl;
+    std::cout << "    The listening port (default 3535)" << std::endl;
+}
+
 int main(int argc, char* argv[]) {
     try {
-        // Check command line arguments.
-        if (argc != 6) {
-            std::cerr << "Usage: http_server_fast <address> <port> <doc_root> <num_workers> {spin|block}\n";
-            std::cerr << "  For IPv4, try:\n";
-            std::cerr << "    http_server_fast 0.0.0.0 80 . 100 block\n";
-            std::cerr << "  For IPv6, try:\n";
-            std::cerr << "    http_server_fast 0::0 80 . 100 block\n";
-            return EXIT_FAILURE;
+        const char* arg_address = NULL;
+        const char* arg_port = NULL;
+        bool expecting_address = false;
+        bool expecting_port = false;
+        for(int i = 1; i < argc; i++) {
+            if(
+                strcmp(argv[i], "-addr") == 0 || 
+                strcmp(argv[i], "--addr") == 0 ||
+                strcmp(argv[i], "-address") == 0 ||
+                strcmp(argv[i], "--address") == 0
+            ) {
+                expecting_address = true;
+            }
+            else
+            if(expecting_address) {
+                expecting_address = false;
+                // std::cout << "debug. setting arg_address to " << argv[i] << std::endl;
+                arg_address = argv[i];
+            }
+            else
+            if(
+                strcmp(argv[i], "-port") == 0 ||
+                strcmp(argv[i], "--port") == 0
+            ) {
+                expecting_port = true;
+            }
+            else
+            if(expecting_port) {
+                expecting_port = false;
+                // std::cout << "debug. setting arg_port to " << argv[i] << std::endl;
+                arg_port = argv[i];
+            }
+            else
+            if(
+                strcmp(argv[i], "-help") == 0 ||
+                strcmp(argv[i], "--help") == 0
+            ) {
+                print_usage(argv[0]);
+                exit(0);
+            }
+            else {
+
+            }
+        }
+        if(arg_address == NULL) {
+            arg_address = "127.0.0.1";
+        }
+        if(arg_port == NULL) {
+            arg_port = "3535";
         }
 
-        auto const address = net::ip::make_address(argv[1]);
-        unsigned short port = static_cast<unsigned short>(std::atoi(argv[2]));
-        std::string doc_root = argv[3];
-        int num_workers = std::atoi(argv[4]);
-        bool spin = (std::strcmp(argv[5], "spin") == 0);
+        auto const address = asio::ip::make_address(arg_address);
+        unsigned short port = static_cast<unsigned short>(std::atoi(arg_port));
 
-        net::io_context ioc{1};
+        int num_workers = std::thread::hardware_concurrency();
+
+        asio::io_context ioc{1};
         tcp::acceptor acceptor{ioc, {address, port}};
 
         std::list<http_worker> workers;
         for (int i = 0; i < num_workers; ++i) {
-            workers.emplace_back(acceptor, doc_root);
+            workers.emplace_back(acceptor);
             workers.back().start();
         }
 
-        if (spin)
-          for (;;) ioc.poll();
-        else
-          ioc.run();
+        std::cout << "Starting server on http://" << address << ":" << port << std::endl;
+        ioc.run();
     }
     catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
