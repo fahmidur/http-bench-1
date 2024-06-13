@@ -23,6 +23,21 @@ namespace http = beast::http;           // from <boost/beast/http.hpp>
 namespace net = boost::asio;            // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
+
+namespace my_program_state {
+    std::size_t
+
+    _req_count() {
+        static std::size_t count = 0;
+        return ++count;
+    }
+
+    std::time_t
+    now() {
+        return std::time(0);
+    }
+}
+
 // Return a reasonable mime type based on the extension of a file.
 beast::string_view
 mime_type(beast::string_view path) {
@@ -168,16 +183,75 @@ private:
     void process_request(http::request<request_body_t, http::basic_fields<alloc_t>> const& req) {
         switch (req.method()) {
         case http::verb::get:
-            send_file(req.target());
+            // send_file(req.target());
+            create_response(req);
             break;
         default:
             // We return responses indicating an error if
             // we do not recognize the request method.
             send_bad_response(
                 http::status::bad_request,
-                "Invalid request-method '" + std::string(req.method_string()) + "'\r\n");
+                "Invalid request-method '" + std::string(req.method_string()) + "'\r\n"
+            );
             break;
         }
+    }
+
+    void create_response(http::request<request_body_t, http::basic_fields<alloc_t>> const& req) {
+        if(req.target() == "/time") {
+            send_time_page();
+        }
+        else {
+            send_bad_response(
+                http::status::bad_request,
+                "Invalid request-method '" + std::string(req.method_string()) + "'\r\n"
+            );
+        }
+    }
+
+    void send_time_page() {
+        string_response_.emplace(
+            std::piecewise_construct,
+            std::make_tuple(),
+            std::make_tuple(alloc_)
+        );
+        string_response_->result(http::status::ok);
+        string_response_->keep_alive(false);
+        string_response_->set(http::field::server, "Beast");
+        string_response_->set(http::field::content_type, "text/html");
+        // beast::ostream(string_response_->body())
+        //     <<  "<html>\n"
+        //     <<  "<head><title>Current time</title></head>\n"
+        //     <<  "<body>\n"
+        //     <<  "<h1>Current time</h1>\n"
+        //     <<  "<p>The current time is "
+        //     <<  my_program_state::now()
+        //     <<  " seconds since the epoch.</p>\n"
+        //     <<  "</body>\n"
+        //     <<  "</html>\n";
+        string_response_->body() = std::string(
+            "<html>\n"
+            "<head><title>Current time</title></head>\n"
+            "<body>\n"
+            "<h1>Current time</h1>\n"
+            "<p>The current time is "
+            " seconds since the epoch.</p>\n"
+            "</body>\n"
+            "</html>\n"
+        );
+
+        string_response_->prepare_payload();
+        string_serializer_.emplace(*string_response_);
+        http::async_write(
+            socket_,
+            *string_serializer_,
+            [this](beast::error_code ec, std::size_t) {
+                socket_.shutdown(tcp::socket::shutdown_send, ec);
+                string_serializer_.reset();
+                string_response_.reset();
+                accept();
+            }
+        );
     }
 
     void send_bad_response(http::status status, std::string const& error) {
