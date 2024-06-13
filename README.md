@@ -29,7 +29,7 @@ Each server implementation is compiled to a static library.
   * Language: C++
   * Libraries: Boost v1.85.0
   * Modified from the [Boost Beast Fast HTTP Server Example](https://github.com/boostorg/beast/blob/boost-1.85.0/example/http/server/fast/http_server_fast.cpp)
-* [golang_1](./golang-1/)
+* [golang_1](./golang_1/)
   * Language: Golang
   * Libraries: Standard `net/http` core library.
 
