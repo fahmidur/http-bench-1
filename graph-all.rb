@@ -2,7 +2,6 @@
 
 require 'json'
 
-
 def which(prog)
   out = `which #{prog}`.strip
   if $?.exitstatus != 0
