@@ -1,0 +1,23 @@
+desc "Build everything"
+task :build => ['server.exe'] do
+end
+
+desc "Build server.exe"
+file 'server.exe' => ['server.js'] do
+  server_js_lines = IO.read('server.js').split("\n")
+  hashbang_line = '#!/usr/bin/env node'
+  if server_js_lines.size == 0 || !server_js_lines.first.start_with?(hashbang_line)
+    server_js_lines.unshift('')
+    server_js_lines.unshift(hashbang_line)
+  end
+  IO.write('server.exe', server_js_lines.join("\n"))
+  sh "chmod +x server.exe"
+end
+
+desc "Clean everything"
+task :clean do
+  sh "rm -f *.exe"
+end
+
+task :default => :build
+
